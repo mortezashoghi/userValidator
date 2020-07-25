@@ -1,21 +1,19 @@
 <?php
-require_once $_SERVER['DOCUMENT_ROOT'].'/sunshine/config.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/userValidator/config.php';
+
 
 class db{
 
+    public $dbh;
     static private $connection;
 
-    public function __construct($dns,$user,$password)
-    {
-        if(!self::$connection){
-            try{
-                self::$connection=new PDO($dns,$user,$password);
-            }catch(PDOException $e){
-
-                die("pdo connection error:".$e->getMessage());
-            }
-        }
-        return self::$connection;
+    private function __construct() {
+        $config=new config();
+        $dns=$config->getDns();
+        $user=$config->getDbUser();
+        $password=$config->getDbPassword();
+        $this->dbh=new PDO($dns,$user,$password);
+        $this->dbh->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
     }
 
     public static  function getinstanse(){

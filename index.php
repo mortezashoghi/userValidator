@@ -1,20 +1,34 @@
 <?php
 
 require_once 'application/customers.php';
-require_once 'application/db.php';
-
 // Start the session
 session_start();
-$dba=new db("mysql:host=127.0.0.1;dbname=sunshine","mors","mortex");
-var_dump($dba);
-var_dump(db::$conn);
 
-// $controller=$_GET["switch"];
-// $token=$_GET["token"];
-// echo $controller.$token;
-// if($controller=="getToken" && $token!=""){
-// $getToken=new customers("","",$token);
-// $result=$getToken->customerVlidator();
-// print_r($result);
+//$results = $stm->fetchAll(PDO::FETCH_ASSOC);
+//$json = json_encode($results);
+$urlPath=parse_url($_SERVER["request_uri"],PHP_URL_PATH);
+var_dump(parse_url($_SERVER["request_uri"]));
+ /*if($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET["switch"]=="getToken" && $_GET["token"]!=""){
 
-//}
+     $getToken=new customers("","",$_GET["token"]);
+    $result=$getToken->customerVlidator();
+    print_r($result);
+
+    }
+ else if($_SERVER['REQUEST_METHOD'] === 'POST' && $_GET["switch"]=="register"){
+        $data=array("username"=>$_POST["username"],"password"=>$_POST["password"],
+            "name"=>$_POST["name"],
+            "family"=>$_POST["family"],
+            "upgrade"=>$_POST["upgrade"],
+            "access"=>$_POST["access"],
+            "mobile"=>$_POST["mobile"],
+            "state"=>$_POST["state"],
+            "comment"=>$_POST["comment"],);
+        $customer=new customers($data["name"],$data["family"],"");
+        $result=$customer->registerNew($data);
+ }else{
+     return false;
+ }
+
+
+*/

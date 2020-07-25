@@ -1,7 +1,9 @@
 <?php
 
-require_once $_SERVER['DOCUMENT_ROOT'].'/sunshine/config.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/userValidator/config.php';
 require_once 'db.php';
+require_once 'users.php';
+
 class customers{
 
 private $customerName;
@@ -12,22 +14,33 @@ private $upgrade;
 private $state;
 private $comment;
 private $access;
-//public $dbconn;
-private  $dns;
-private  $dbuser;
-private  $password;
+private $mobile;
+
+    /**
+     * @return mixed
+     */
+    public function getMobile()
+    {
+        return $this->mobile;
+    }
+
+    /**
+     * @param mixed $mobile
+     */
+    public function setMobile($mobile)
+    {
+        $this->mobile = $mobile;
+    }
+protected $connectionpipe;
+
+
 
 public function __construct($name="",$family="",$token="")
 {
     $this->setCustomerName($name);
     $this->setCustomerFamily($family);
     $this->setToken($token);
-    $config=new config();
-    echo $config->getDns();
-    $this->setDns($config->getDns());
-    $this->setDbuser($config->getDbUser());
-    $this->setPassword($config->getDbPassword());
-
+    $this->connectionpipe=db::getinstanse();
 }
 
 // getter and setter
@@ -196,25 +209,52 @@ return $this;
 
 //end of getter and setter
 
-public function registerNew()
-{
-    $stm="insert into customers(name,family,c_date,upgrade,access,token,state,comment) values (:name,:family,:c_date,:upgrade,:access,:token,:state,:comment)";
-    if($this->getCustomerName()=="" || $this->getCustomerFamily()=="" || $this->getToken()==""){
-        return false;
+public function registerNew($data){
 
-    }else{
-        $this->createToken();
-        $stm=$this->$dbconn->prepare($stm);
-        $stm->bindParam(':name',$this->getCustomerName());
-        $stm->bindParam(':family',$this->getCustomerFamily());
-        $stm->bindParam(':c_date',date("Y/m/d"));
-        $stm->bindParam(':upgrade',$this->getUpgrade());
-        $stm->bindParam(':access',$this->getAccess());
-        $stm->bindParam(':token',$this->getToken());
-        $stm->bindParam(':state',$this->getState());
-        $stm->bindParam(':comment',$this->getComment());
-        $stm->execute();
-}
+    $username=$data["username"];
+    $password=$data["password"];
+
+    $this->setCustomerName($data["name"]);
+    $this->setCustomerFamily($data["family"]);
+    $this->setUpgrade($data["upgrade"]);
+    $this->setAccess($data["access"]);
+
+    $this->setState($data["state"]);
+    $this->setComment($data["commnet"]);
+    $this->setMobile($data["mobile"]);
+
+    $userAuth=new users($username,$password);
+    if($userAuth->auth()){
+        $stm="insert into customers(name,family,mobile,c_date,upgrade,access,token,state,comment) values (:name,:family,:mobile,:c_date,:upgrade,:access,:token,:state,:comment)";
+        if($this->getCustomerName()=="" || $this->getCustomerFamily()=="" || $this->getToken()==""){
+            return false;
+        }else{
+           try {
+               $this->createToken();
+               $stm = $this->connectionpipe->dbh->prepare($stm);
+               $stm->bindParam(':name', $this->getCustomerName());
+               $stm->bindParam(':family', $this->getCustomerFamily());
+               $stm->bindParam(':mobile', $this->getMobile());
+               $stm->bindParam(':c_date', date("Y-m-d H:i:s"));
+               $stm->bindParam(':upgrade', $this->getUpgrade());
+               $stm->bindParam(':access', $this->getAccess());
+               $stm->bindParam(':token', $this->getToken());
+               $stm->bindParam(':state', $this->getState());
+               $stm->bindParam(':comment', $this->getComment());
+               $stm->execute();
+               //$id = $pdo->lastInsertId();
+               $result=array("message"=>"Successfully Inserted","code"=>"11");
+               return json_encode($result);
+           }
+           catch(PDOException $e) {
+               return $e->getMessage();
+           }
+        }
+
+
+    }
+
+
 }
 
 public function editCustomer()
@@ -225,7 +265,7 @@ public function editCustomer()
 
     }else
     {
-        $stm=$this->$dbconn->prepare($stm);
+        $stm=$this->connectionpipe->dbh->prepare($stm);
         $stm->bindParam(':name',$this->getCustomerName());
         $stm->bindParam(':family',$this->getCustomerFamily());
         $stm->bindParam(':c_date',date("Y/m/d"));
@@ -258,16 +298,15 @@ public function customerVlidator()
     $stm="select * from customers where token=:token";
     
     if ($this->getToken()!="") {
-        $dbconn=new db($this->getDns(),$this->getDbuser(),$this->getPassword());
-        $stm=$dbconn->prepare($stm);
-        $stm->bindParam(':token',$this->getToken());
+        $stm=$this->connectionpipe->dbh->prepare($stm);
+        $stm->bindParam(':token',$this->token);
         $stm->execute();
         if ($stm->rowCount() > 0) {
             return true;
           } else {
             return false;
           }
-        
+
      }else{
         return "Incorrect token";
     }

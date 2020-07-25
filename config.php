@@ -1,13 +1,13 @@
 <?php
 class config{
     public $dbUser='mors';
-    public $dbPassword='';
+    public $dbPassword='mortex';
     public $dbHost='localhost';
     
     public $encAlm='sha1';
-    public $salt='';
-    public $dbName='';
-    public $dns="mysql:host=127.0.0.1;dbname=";
+    public $salt='sunshine';
+    public $dbName='sunshine';
+    public $dns="mysql:host=127.0.0.1;dbname=sunshine";
     /**
      * Get the value of dbUser
      */ 
