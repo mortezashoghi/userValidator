@@ -6,8 +6,10 @@ session_start();
 
 //$results = $stm->fetchAll(PDO::FETCH_ASSOC);
 //$json = json_encode($results);
-$urlPath=parse_url($_SERVER["request_uri"],PHP_URL_PATH);
-var_dump(parse_url($_SERVER["request_uri"]));
+if(isset($_SERVER["request_uri"])) {
+    //$urlPath = parse_url($_SERVER["request_uri"], PHP_URL_PATH);
+    var_dump(parse_url($_SERVER["request_uri"]));
+}
  /*if($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET["switch"]=="getToken" && $_GET["token"]!=""){
 
      $getToken=new customers("","",$_GET["token"]);
